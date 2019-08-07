@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Oxide.Plugins
 {
     [Info("Minicopter Seating", "Bazz3l", "1.0.1")]
-    [Description("Allows 4 seat on the mini copter")]
+    [Description("Allows 4 to be seated on the mini copter")]
     class MinicopterSeating : RustPlugin
     {
         void OnEntitySpawned(MiniCopter mini)
@@ -19,6 +19,7 @@ namespace Oxide.Plugins
 
         class CopterSeating : MonoBehaviour
         {
+            const string ChairPrefab = "assets/prefabs/vehicle/seats/passengerchair.prefab";
             public BaseVehicle mini;
             public BaseEntity seat1;
             public BaseEntity seat2;
@@ -52,7 +53,7 @@ namespace Oxide.Plugins
                 mini.mountPoints[2] = mountPoint1;
                 mini.mountPoints[3] = mountPoint2;
 
-                seat1 = GameManager.server?.CreateEntity("assets/prefabs/vehicle/seats/passengerchair.prefab", mini.transform.position) as BaseEntity;
+                seat1 = GameManager.server?.CreateEntity(ChairPrefab, mini.transform.position) as BaseEntity;
                 if (seat1 == null)
                 {
                     return;
@@ -63,7 +64,7 @@ namespace Oxide.Plugins
                 seat1.transform.localPosition = new Vector3(0.6f, 0f, -0.4f);
                 seat1.SendNetworkUpdateImmediate(true);
 
-                seat2 = GameManager.server?.CreateEntity("assets/prefabs/vehicle/seats/passengerchair.prefab", mini.transform.position) as BaseEntity;
+                seat2 = GameManager.server?.CreateEntity(ChairPrefab, mini.transform.position) as BaseEntity;
                 if (seat2 == null)
                 {
                     return;
