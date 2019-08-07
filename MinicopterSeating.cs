@@ -19,7 +19,7 @@ namespace Oxide.Plugins
 
         class CopterSeating : MonoBehaviour
         {
-            const string ChairPrefab = "assets/prefabs/vehicle/seats/passengerchair.prefab";
+            public const string ChairPrefab = "assets/prefabs/vehicle/seats/passengerchair.prefab";
             public BaseVehicle mini;
             public BaseEntity seat1;
             public BaseEntity seat2;
