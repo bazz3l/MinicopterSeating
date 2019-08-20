@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Oxide.Plugins
 {
     [Info("Minicopter Seating", "Bazz3l", "1.0.1")]
-    [Description("Allows 4 to be seated on the mini copter")]
+    [Description("Adds 2 extra seats to minicopter")]
     class MinicopterSeating : RustPlugin
     {
         void OnEntitySpawned(MiniCopter mini)
