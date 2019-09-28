@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("Minicopter Seating", "Bazz3l", "1.0.5")]
+    [Info("Minicopter Seating", "Bazz3l", "1.0.6")]
     [Description("Allows 2 extra seats on the mini copter")]
     class MinicopterSeating : RustPlugin
     {
