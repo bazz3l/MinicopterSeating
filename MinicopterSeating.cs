@@ -3,8 +3,8 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("Minicopter Seating", "Bazz3l", "1.0.1")]
-    [Description("Allows 4 seat on the mini copter")]
+    [Info("Minicopter Seating", "Bazz3l", "1.0.5")]
+    [Description("Allows 2 extra seats on the mini copter")]
     class MinicopterSeating : RustPlugin
     {
         void OnEntitySpawned(MiniCopter mini)
@@ -13,15 +13,14 @@ namespace Oxide.Plugins
             {
                 return;
             }
-
-            mini.gameObject.AddComponent<CopterSeating>();
+                
+            if (mini.mountPoints.Length < 4)
+                mini?.gameObject.AddComponent<CopterSeating>();
         }
 
         class CopterSeating : MonoBehaviour
         {
             public BaseVehicle mini;
-            public BaseEntity seat1;
-            public BaseEntity seat2;
 
             void Awake()
             {
@@ -29,7 +28,6 @@ namespace Oxide.Plugins
                 if (mini == null)
                 {
                     Destroy(this);
-
                     return;
                 }
 
@@ -37,7 +35,7 @@ namespace Oxide.Plugins
 
                 BaseVehicle.MountPointInfo mountPoint1 = new BaseVehicle.MountPointInfo
                 {
-                    pos       = new Vector3(0.6f, 0f, -0.2f),
+                    pos       = new Vector3(0.6f, 0.2f, -0.2f),
                     rot       = mini.mountPoints[0].rot,
                     prefab    = mini.mountPoints[1].prefab,
                     mountable = mini.mountPoints[0].mountable,
@@ -45,7 +43,7 @@ namespace Oxide.Plugins
 
                 BaseVehicle.MountPointInfo mountPoint2 = new BaseVehicle.MountPointInfo
                 {
-                    pos       = new Vector3(-0.6f, 0f, -0.2f),
+                    pos       = new Vector3(-0.6f, 0.2f, -0.2f),
                     rot       = mini.mountPoints[0].rot,
                     prefab    = mini.mountPoints[1].prefab,
                     mountable = mini.mountPoints[0].mountable,
@@ -54,27 +52,22 @@ namespace Oxide.Plugins
                 mini.mountPoints[2] = mountPoint1;
                 mini.mountPoints[3] = mountPoint2;
 
-                seat1 = GameManager.server?.CreateEntity("assets/prefabs/vehicle/seats/passengerchair.prefab", mini.transform.position) as BaseEntity;
-                if (seat1 == null)
+                MakeSeat(mini, new Vector3(0.6f, 0.2f, -0.5f));
+                MakeSeat(mini, new Vector3(-0.6f, 0.2f, -0.5f));
+            }
+
+            void MakeSeat(BaseVehicle mini, Vector3 locPos)
+            {
+                BaseEntity seat = GameManager.server.CreateEntity("assets/prefabs/vehicle/seats/passengerchair.prefab", mini.transform.position) as BaseEntity;
+                if (seat == null)
                 {
                     return;
                 }
 
-                seat1.SetParent(mini);
-                seat1.Spawn();
-                seat1.transform.localPosition = new Vector3(0.6f, 0f, -0.4f);
-                seat1.SendNetworkUpdateImmediate(true);
-
-                seat2 = GameManager.server?.CreateEntity("assets/prefabs/vehicle/seats/passengerchair.prefab", mini.transform.position) as BaseEntity;
-                if (seat2 == null)
-                {
-                    return;
-                }
-
-                seat2.SetParent(mini);
-                seat2.Spawn();
-                seat2.transform.localPosition = new Vector3(-0.6f, 0f, -0.4f);
-                seat2.SendNetworkUpdateImmediate(true);
+                seat.SetParent(mini);
+                seat.Spawn();
+                seat.transform.localPosition = locPos;
+                seat.SendNetworkUpdateImmediate(true);
             }
         }
     }
