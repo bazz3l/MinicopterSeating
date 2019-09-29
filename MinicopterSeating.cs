@@ -3,17 +3,17 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("Minicopter Seating", "Bazz3l", "1.0.6")]
+    [Info("Minicopter Seating", "Bazz3l", "1.0.7")]
     [Description("Allows 2 extra seats on the mini copter")]
     class MinicopterSeating : RustPlugin
     {
         void OnEntitySpawned(MiniCopter mini)
         {
-            if (mini == null)
+            if (mini == null || mini.ShortPrefabName != "minicopter.entity")
             {
                 return;
             }
-                
+
             if (mini.mountPoints.Length < 4)
                 mini?.gameObject.AddComponent<CopterSeating>();
         }
