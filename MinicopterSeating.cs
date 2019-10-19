@@ -3,21 +3,55 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("Minicopter Seating", "Bazz3l", "1.0.7")]
+    [Info("Minicopter Seating", "Bazz3l", "1.0.8")]
     [Description("Allows 2 extra seats on the mini copter")]
     class MinicopterSeating : RustPlugin
     {
+        private const string Perm = "minicopterseating.mymini";
+
+        #region Config
+        private PluginConfig config;
+
+        protected override void LoadDefaultConfig()
+        {
+            Config.WriteObject(GetDefaultConfig(), true);
+        }
+
+        private PluginConfig GetDefaultConfig()
+        {
+            return new PluginConfig
+            {
+                MyMiniOnly = false
+            };
+        }
+
+        private class PluginConfig
+        {
+            public bool MyMiniOnly;
+        }
+        #endregion
+
+        #region Oxide
+        void Init()
+        {
+            permission.RegisterPermission(Perm, this);
+
+            config = Config.ReadObject<PluginConfig>();
+        }
+
         void OnEntitySpawned(MiniCopter mini)
         {
-            if (mini == null || mini.ShortPrefabName != "minicopter.entity")
-            {
-                return;
-            }
+            if (mini == null || mini.ShortPrefabName != "minicopter.entity") return;
+
+            if (config.MyMiniOnly && mini.OwnerID == 0) return;
+            if (config.MyMiniOnly && !permission.UserHasPermission(mini.OwnerID.ToString(), Perm)) return;
 
             if (mini.mountPoints.Length < 4)
                 mini?.gameObject.AddComponent<CopterSeating>();
         }
+        #endregion
 
+        #region Scripts
         class CopterSeating : MonoBehaviour
         {
             public BaseVehicle mini;
@@ -65,10 +99,10 @@ namespace Oxide.Plugins
                 }
 
                 seat.SetParent(mini);
-                seat.Spawn();
                 seat.transform.localPosition = locPos;
-                seat.SendNetworkUpdateImmediate(true);
+                seat.Spawn();
             }
         }
+        #endregion
     }
 }
