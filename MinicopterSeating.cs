@@ -1,73 +1,81 @@
-using System;
 using UnityEngine;
+using System;
 
 namespace Oxide.Plugins
 {
-    [Info("Minicopter Seating", "Bazz3l", "1.0.8")]
-    [Description("Allows 2 extra seats on the mini copter")]
+    [Info("Minicopter Seating", "Bazz3l", "1.0.9")]
+    [Description("Spawns minicopters with extra seats at the sides.")]
     class MinicopterSeating : RustPlugin
     {
+        #region Oxide
         void OnEntitySpawned(MiniCopter mini)
         {
-            if (mini == null || mini.ShortPrefabName != "minicopter.entity") return;
-            if (mini.mountPoints.Length < 4)
-                mini?.gameObject.AddComponent<CopterSeating>();
-        }
+            if (mini?.ShortPrefabName != "minicopter.entity")
+            {
+                return;
+            }
 
+            if (mini.mountPoints.Length < 4)
+            {
+                mini.gameObject.AddComponent<CopterSeating>();
+            }
+        }
+        #endregion
+
+        #region Component
         class CopterSeating : MonoBehaviour
         {
-            public string ChairPrefab = "assets/prefabs/vehicle/seats/passengerchair.prefab";
-            public BaseVehicle mini;
+            const string _chairPrefab = "assets/prefabs/vehicle/seats/passengerchair.prefab";
+            BaseVehicle _mini;
 
             void Awake()
             {
-                mini = GetComponent<BaseVehicle>();
-                if (mini == null)
+                _mini = GetComponent<BaseVehicle>();
+                if (_mini == null)
                 {
                     Destroy(this);
                     return;
                 }
 
-                BaseVehicle.MountPointInfo pilot      = mini.mountPoints[0];
-                BaseVehicle.MountPointInfo passenger1 = mini.mountPoints[1];
+                BaseVehicle.MountPointInfo pilot     = _mini.mountPoints[0];
+                BaseVehicle.MountPointInfo passenger = _mini.mountPoints[1];
 
-                Array.Resize(ref mini.mountPoints, 4);
+                Array.Resize(ref _mini.mountPoints, 4);
 
-                BaseVehicle.MountPointInfo passenger2 = new BaseVehicle.MountPointInfo
-                {
-                    pos       = new Vector3(0.6f, 0.2f, -0.2f),
-                    rot       = mini.mountPoints[1].rot,
-                    prefab    = mini.mountPoints[1].prefab,
-                    mountable = mini.mountPoints[1].mountable,
-                };
+                _mini.mountPoints[0] = pilot;
+                _mini.mountPoints[1] = passenger;
+                _mini.mountPoints[2] = MountPoint(new Vector3(0.6f, 0.2f, -0.3f));
+                _mini.mountPoints[3] = MountPoint(new Vector3(-0.6f, 0.2f, -0.3f));
 
-                BaseVehicle.MountPointInfo passenger3 = new BaseVehicle.MountPointInfo
-                {
-                    pos       = new Vector3(-0.6f, 0.2f, -0.2f),
-                    rot       = mini.mountPoints[1].rot,
-                    prefab    = mini.mountPoints[1].prefab,
-                    mountable = mini.mountPoints[1].mountable,
-                };
-
-                mini.mountPoints[0] = pilot;
-                mini.mountPoints[1] = passenger1;
-                mini.mountPoints[2] = passenger2;
-                mini.mountPoints[3] = passenger3;
-
-                MakeSeat(mini, new Vector3(0.6f, 0.2f, -0.5f));
-                MakeSeat(mini, new Vector3(-0.6f, 0.2f, -0.5f));
+                MakeSeat(new Vector3(0.6f, 0.2f, -0.5f));
+                MakeSeat(new Vector3(-0.6f, 0.2f, -0.5f));
             }
 
-            void MakeSeat(BaseVehicle mini, Vector3 locPos)
+            BaseVehicle.MountPointInfo MountPoint(Vector3 position)
             {
-                BaseEntity seat = GameManager.server.CreateEntity(ChairPrefab, mini.transform.position) as BaseEntity;
-                if (seat == null) return;
+                return new BaseVehicle.MountPointInfo
+                {
+                    pos       = position,
+                    rot       = _mini.mountPoints[1].rot,
+                    prefab    = _mini.mountPoints[1].prefab,
+                    mountable = _mini.mountPoints[1].mountable,
+                };
+            }
 
-                seat.SetParent(mini);
+            void MakeSeat(Vector3 localPosition)
+            {
+                BaseEntity seat = GameManager.server.CreateEntity(_chairPrefab, transform.position) as BaseEntity;
+                if (seat == null)
+                {
+                    return;
+                }
+
+                seat.SetParent(_mini);
                 seat.Spawn();
-                seat.transform.localPosition = locPos;
+                seat.transform.localPosition = localPosition;
                 seat.SendNetworkUpdateImmediate(true);
             }
         }
+        #endregion
     }
 }
