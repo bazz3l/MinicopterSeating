@@ -27,7 +27,7 @@ namespace Oxide.Plugins
                 SetupSeating();
             }
 
-            public void SetupSeating()
+            void SetupSeating()
             {
                 BaseVehicle.MountPointInfo pilot     = mini.mountPoints[0];
                 BaseVehicle.MountPointInfo passenger = mini.mountPoints[1];
