@@ -3,79 +3,70 @@ using System;
 
 namespace Oxide.Plugins
 {
-    [Info("Minicopter Seating", "Bazz3l", "1.0.9")]
-    [Description("Spawns minicopters with extra seats at the sides.")]
+    [Info("Minicopter Seating", "Bazz3l", "1.1.0")]
+    [Description("Spawns an extra seat each side of the minicopter.")]
     class MinicopterSeating : RustPlugin
     {
-        #region Oxide
         void OnEntitySpawned(MiniCopter mini)
         {
-            if (mini?.ShortPrefabName != "minicopter.entity")
+            if (mini.ShortPrefabName == "minicopter.entity" && mini.mountPoints.Length < 4)
             {
-                return;
-            }
-
-            if (mini.mountPoints.Length < 4)
-            {
-                mini.gameObject.AddComponent<CopterSeating>();
+                new SeatingManager((BaseVehicle) mini);
             }
         }
-        #endregion
 
-        #region Component
-        class CopterSeating : MonoBehaviour
+        class SeatingManager
         {
-            const string _chairPrefab = "assets/prefabs/vehicle/seats/passengerchair.prefab";
-            BaseVehicle _mini;
+            string chairPrefab = "assets/prefabs/vehicle/seats/passengerchair.prefab";
+            BaseVehicle mini;
 
-            void Awake()
+            public SeatingManager(BaseVehicle mini)
             {
-                _mini = GetComponent<BaseVehicle>();
-                if (_mini == null)
-                {
-                    Destroy(this);
-                    return;
-                }
+                this.mini = mini;
 
-                BaseVehicle.MountPointInfo pilot     = _mini.mountPoints[0];
-                BaseVehicle.MountPointInfo passenger = _mini.mountPoints[1];
+                SetupSeating();
+            }
 
-                Array.Resize(ref _mini.mountPoints, 4);
+            public void SetupSeating()
+            {
+                BaseVehicle.MountPointInfo pilot     = mini.mountPoints[0];
+                BaseVehicle.MountPointInfo passenger = mini.mountPoints[1];
 
-                _mini.mountPoints[0] = pilot;
-                _mini.mountPoints[1] = passenger;
-                _mini.mountPoints[2] = MountPoint(new Vector3(0.6f, 0.2f, -0.3f));
-                _mini.mountPoints[3] = MountPoint(new Vector3(-0.6f, 0.2f, -0.3f));
+                Array.Resize(ref mini.mountPoints, 4);
+
+                mini.mountPoints[0] = pilot;
+                mini.mountPoints[1] = passenger;
+                mini.mountPoints[2] = MakeMount(new Vector3(0.6f, 0.2f, -0.2f));
+                mini.mountPoints[3] = MakeMount(new Vector3(-0.6f, 0.2f, -0.2f));
 
                 MakeSeat(new Vector3(0.6f, 0.2f, -0.5f));
                 MakeSeat(new Vector3(-0.6f, 0.2f, -0.5f));
             }
 
-            BaseVehicle.MountPointInfo MountPoint(Vector3 position)
+            void MakeSeat(Vector3 position)
             {
-                return new BaseVehicle.MountPointInfo
-                {
-                    pos       = position,
-                    rot       = _mini.mountPoints[1].rot,
-                    prefab    = _mini.mountPoints[1].prefab,
-                    mountable = _mini.mountPoints[1].mountable,
-                };
-            }
-
-            void MakeSeat(Vector3 localPosition)
-            {
-                BaseEntity seat = GameManager.server.CreateEntity(_chairPrefab, transform.position) as BaseEntity;
+                BaseEntity seat = GameManager.server.CreateEntity(chairPrefab, mini.transform.position);
                 if (seat == null)
                 {
                     return;
                 }
 
-                seat.SetParent(_mini);
+                seat.SetParent(mini);
                 seat.Spawn();
-                seat.transform.localPosition = localPosition;
+                seat.transform.localPosition = position;
                 seat.SendNetworkUpdateImmediate(true);
             }
+
+            BaseVehicle.MountPointInfo MakeMount(Vector3 position)
+            {
+                return new BaseVehicle.MountPointInfo
+                {
+                    pos       = position,
+                    rot       = mini.mountPoints[1].rot,
+                    prefab    = mini.mountPoints[1].prefab,
+                    mountable = mini.mountPoints[1].mountable,
+                };
+            }
         }
-        #endregion
     }
 }
