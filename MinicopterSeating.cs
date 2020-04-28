@@ -7,14 +7,18 @@ namespace Oxide.Plugins
     [Description("Spawns an extra seat each side of the minicopter.")]
     class MinicopterSeating : RustPlugin
     {
+        #region Oxide
         void OnEntitySpawned(MiniCopter mini)
         {
             if (mini.ShortPrefabName == "minicopter.entity" && mini.mountPoints.Length < 4)
             {
-                new SeatingManager((BaseVehicle) mini);
+                SeatingManager manager = new SeatingManager((BaseVehicle) mini);
+                manager?.SetupSeating();
             }
         }
+        #endregion
 
+        #region SeatingManger
         class SeatingManager
         {
             string chairPrefab = "assets/prefabs/vehicle/seats/passengerchair.prefab";
@@ -23,11 +27,9 @@ namespace Oxide.Plugins
             public SeatingManager(BaseVehicle mini)
             {
                 this.mini = mini;
-
-                SetupSeating();
             }
 
-            void SetupSeating()
+            public void SetupSeating()
             {
                 BaseVehicle.MountPointInfo pilot     = mini.mountPoints[0];
                 BaseVehicle.MountPointInfo passenger = mini.mountPoints[1];
@@ -68,5 +70,6 @@ namespace Oxide.Plugins
                 };
             }
         }
+        #endregion
     }
 }
