@@ -7,13 +7,16 @@ namespace Oxide.Plugins
     [Description("Spawns an extra seat each side of the minicopter.")]
     class MinicopterSeating : RustPlugin
     {
+        #region Fields
+        SeatingManager _manager = new SeatingManager();
+        #endregion
+
         #region Oxide
         void OnEntitySpawned(MiniCopter mini)
         {
-            if (mini.ShortPrefabName == "minicopter.entity" && mini.mountPoints.Length < 4)
+            if (mini.mountPoints.Length < 4 && mini.ShortPrefabName == "minicopter.entity")
             {
-                SeatingManager manager = new SeatingManager((BaseVehicle) mini);
-                manager?.SetupSeating();
+                _manager.Setup((BaseVehicle) mini);
             }
         }
         #endregion
@@ -21,33 +24,27 @@ namespace Oxide.Plugins
         #region SeatingManger
         class SeatingManager
         {
-            string chairPrefab = "assets/prefabs/vehicle/seats/passengerchair.prefab";
-            BaseVehicle mini;
+            const string _chairPrefab = "assets/prefabs/vehicle/seats/passengerchair.prefab";
 
-            public SeatingManager(BaseVehicle mini)
+            public void Setup(BaseVehicle mini)
             {
-                this.mini = mini;
-            }
-
-            public void SetupSeating()
-            {
-                BaseVehicle.MountPointInfo pilot     = mini.mountPoints[0];
+                BaseVehicle.MountPointInfo pilot = mini.mountPoints[0];
                 BaseVehicle.MountPointInfo passenger = mini.mountPoints[1];
 
                 Array.Resize(ref mini.mountPoints, 4);
 
                 mini.mountPoints[0] = pilot;
                 mini.mountPoints[1] = passenger;
-                mini.mountPoints[2] = MakeMount(new Vector3(0.6f, 0.2f, -0.2f));
-                mini.mountPoints[3] = MakeMount(new Vector3(-0.6f, 0.2f, -0.2f));
+                mini.mountPoints[2] = MakeMount(mini, new Vector3(0.6f, 0.2f, -0.2f));
+                mini.mountPoints[3] = MakeMount(mini, new Vector3(-0.6f, 0.2f, -0.2f));
 
-                MakeSeat(new Vector3(0.6f, 0.2f, -0.5f));
-                MakeSeat(new Vector3(-0.6f, 0.2f, -0.5f));
+                MakeSeat(mini, new Vector3(0.6f, 0.2f, -0.5f));
+                MakeSeat(mini, new Vector3(-0.6f, 0.2f, -0.5f));
             }
 
-            void MakeSeat(Vector3 position)
+            void MakeSeat(BaseVehicle mini, Vector3 position)
             {
-                BaseEntity seat = GameManager.server.CreateEntity(chairPrefab, mini.transform.position);
+                BaseEntity seat = GameManager.server.CreateEntity(_chairPrefab, mini.transform.position);
                 if (seat == null)
                 {
                     return;
@@ -59,7 +56,7 @@ namespace Oxide.Plugins
                 seat.SendNetworkUpdateImmediate(true);
             }
 
-            BaseVehicle.MountPointInfo MakeMount(Vector3 position)
+            BaseVehicle.MountPointInfo MakeMount(BaseVehicle mini, Vector3 position)
             {
                 return new BaseVehicle.MountPointInfo
                 {
