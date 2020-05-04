@@ -3,7 +3,7 @@ using System;
 
 namespace Oxide.Plugins
 {
-    [Info("Minicopter Seating", "Bazz3l", "1.1.1")]
+    [Info("Minicopter Seating", "Bazz3l", "1.1.2")]
     [Description("Spawns an extra seat each side of the minicopter.")]
     class MinicopterSeating : RustPlugin
     {
@@ -12,16 +12,16 @@ namespace Oxide.Plugins
         #endregion
 
         #region Oxide
-        void OnEntitySpawned(MiniCopter mini)
+        void OnEntitySpawned(BaseVehicle mini)
         {
             if (mini.mountPoints.Length < 4 && mini.ShortPrefabName == "minicopter.entity")
             {
-                _manager.Setup((BaseVehicle) mini);
+                _manager.Setup(mini);
             }
         }
         #endregion
 
-        #region SeatingManger
+        #region Seating
         class SeatingManager
         {
             const string _chairPrefab = "assets/prefabs/vehicle/seats/passengerchair.prefab";
