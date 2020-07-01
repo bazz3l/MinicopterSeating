@@ -3,13 +3,12 @@ using System;
 
 namespace Oxide.Plugins
 {
-    [Info("Minicopter Seating", "Bazz3l", "1.1.2")]
+    [Info("Minicopter Seating", "Bazz3l", "1.1.4")]
     [Description("Spawns an extra seat each side of the minicopter.")]
     class MinicopterSeating : RustPlugin
     {
         #region Fields
         const string _chairPrefab = "assets/prefabs/vehicle/seats/passengerchair.prefab";
-        
         SeatingManager _manager = new SeatingManager();
         #endregion
 
@@ -31,7 +30,7 @@ namespace Oxide.Plugins
                 BaseVehicle.MountPointInfo pilot = vehicle.mountPoints[0];
                 BaseVehicle.MountPointInfo passenger = vehicle.mountPoints[1];
 
-                Array.Resize(ref vehicle.mountPoints, 4);
+                Array.Resize<BaseVehicle.MountPointInfo>(ref vehicle.mountPoints, 4);
 
                 vehicle.mountPoints[0] = pilot;
                 vehicle.mountPoints[1] = passenger;
@@ -46,11 +45,9 @@ namespace Oxide.Plugins
             {
                 BaseEntity entity = GameManager.server.CreateEntity(_chairPrefab, vehicle.transform.position);
                 if (entity == null) return;
-                
                 entity.SetParent(vehicle);
                 entity.transform.localPosition = position;
                 entity.Spawn();
-                entity.SendNetworkUpdateImmediate(true);
             }
 
             BaseVehicle.MountPointInfo MakeMount(BaseVehicle vehicle, Vector3 position)
