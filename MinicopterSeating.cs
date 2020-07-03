@@ -1,9 +1,10 @@
+using System.Collections.Generic;
 using UnityEngine;
 using System;
 
 namespace Oxide.Plugins
 {
-    [Info("Minicopter Seating", "Bazz3l", "1.1.4")]
+    [Info("Minicopter Seating", "Bazz3l", "1.1.5")]
     [Description("Spawns an extra seat each side of the minicopter.")]
     class MinicopterSeating : RustPlugin
     {
@@ -15,7 +16,7 @@ namespace Oxide.Plugins
         #region Oxide
         void OnEntitySpawned(BaseVehicle mini)
         {
-            if (mini.mountPoints.Length < 4 && mini.ShortPrefabName == "minicopter.entity")
+            if (mini.mountPoints.Count < 4 && mini.ShortPrefabName == "minicopter.entity")
             {
                 _manager.Setup(mini);
             }
@@ -30,12 +31,8 @@ namespace Oxide.Plugins
                 BaseVehicle.MountPointInfo pilot = vehicle.mountPoints[0];
                 BaseVehicle.MountPointInfo passenger = vehicle.mountPoints[1];
 
-                Array.Resize<BaseVehicle.MountPointInfo>(ref vehicle.mountPoints, 4);
-
-                vehicle.mountPoints[0] = pilot;
-                vehicle.mountPoints[1] = passenger;
-                vehicle.mountPoints[2] = MakeMount(vehicle, new Vector3(0.6f, 0.2f, -0.3f));
-                vehicle.mountPoints[3] = MakeMount(vehicle, new Vector3(-0.6f, 0.2f, -0.3f));
+                vehicle.mountPoints.Add(MakeMount(vehicle, new Vector3(0.6f, 0.2f, -0.3f)));
+                vehicle.mountPoints.Add(MakeMount(vehicle, new Vector3(-0.6f, 0.2f, -0.3f)));
 
                 MakeSeat(vehicle, new Vector3(0.6f, 0.2f, -0.5f));
                 MakeSeat(vehicle, new Vector3(-0.6f, 0.2f, -0.5f));
